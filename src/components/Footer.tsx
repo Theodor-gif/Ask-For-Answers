@@ -43,31 +43,67 @@ const Footer = () => {
 
   return (
     <footer className="bg-zinc-200">
-      <h2>NAVIGATION</h2>
-      <ul>
-        {navigationList.map((item) => (
-          <li key={item.id} className="text-gray-600 text-base">
-            <Link to={item.link}>{item.name}</Link>
-          </li>
-        ))}
-      </ul>
-      <h2>INFORMATION</h2>
-      <ul>
-        {infoList.map((item) => (
-          <li key={item.id} className="text-gray-600 text-base">
-            {item.info}
-          </li>
-        ))}
-      </ul>
-      <h2 className="">Ask For Answers SOCIAL</h2>
-      <ul>
-        {socialList.map((item) => (
-          <li key={item.id}>
-            <img src={item.logo} alt="social-icon" width="15" />
-          </li>
-        ))}
-      </ul>
-      <small></small>
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-10 text-center md:grid-cols-3 md:text-left">
+        <div>
+          <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-zinc-900">
+            NAVIGATION
+          </h2>
+          <ul className="space-y-2">
+            {navigationList.map((item) => (
+              <li key={item.id} className="text-base text-gray-600">
+                <Link
+                  to={item.link}
+                  className="transition-colors hover:text-zinc-900"
+                >
+                  {item.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-zinc-900">
+            INFORMATION
+          </h2>
+          <ul className="space-y-2">
+            {infoList.map((item) => (
+              <li
+                key={item.id}
+                className="cursor-pointer text-base text-gray-600 transition-colors hover:text-zinc-900"
+              >
+                {item.info}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-zinc-900">
+            Ask For Answers SOCIAL
+          </h2>
+          <ul className="flex items-center justify-center gap-4 md:justify-start">
+            {socialList.map((item) => (
+              <li
+                key={item.id}
+                className="cursor-pointer opacity-70 transition-opacity hover:opacity-100"
+              >
+                <img
+                  className="h-6 w-6 object-contain"
+                  src={item.logo}
+                  alt="social-icon"
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="border-t border-zinc-300 py-4 text-center">
+        <small className="text-sm text-gray-500">
+          © 2026 Ask For Answers. All rights reserved.
+        </small>
+      </div>
     </footer>
   );
 };

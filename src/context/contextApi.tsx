@@ -1,4 +1,4 @@
-import {
+import React, {
   createContext,
   type Dispatch,
   type ReactNode,
@@ -55,6 +55,13 @@ type DataProps = {
   setEmailLog: Dispatch<SetStateAction<string>>;
   setPasswordLog: Dispatch<SetStateAction<string>>;
   logInUser: (e: React.FormEvent<HTMLFormElement>) => Promise<boolean>;
+  titleUser: string;
+  textUser: string;
+  setTitleUser: Dispatch<SetStateAction<string>>;
+  setTextUser: Dispatch<SetStateAction<string>>;
+  AddPost: (e: React.FormEvent<HTMLFormElement>) => Promise<boolean>;
+  setIdUser: Dispatch<SetStateAction<string>>;
+  idUser: string;
 };
 
 type DataProvider = {
@@ -86,6 +93,13 @@ const defaultData: DataProps = {
   setEmailLog: () => {},
   setPasswordLog: () => {},
   logInUser: async () => false,
+  titleUser: "",
+  textUser: "",
+  setTitleUser: () => {},
+  setTextUser: () => {},
+  AddPost: async () => false,
+  idUser: "",
+  setIdUser: () => {},
 };
 
 export const dataContext = createContext<DataProps>(defaultData);
@@ -101,6 +115,9 @@ export const DataContextProvider = ({ children }: DataProvider) => {
   const [view, setView] = useState(false);
   const [emailLog, setEmailLog] = useState("");
   const [passwordLog, setPasswordLog] = useState("");
+  const [titleUser, setTitleUser] = useState("");
+  const [textUser, setTextUser] = useState("");
+  const [idUser, setIdUser] = useState("");
 
   async function getUsers() {
     try {
@@ -152,10 +169,36 @@ export const DataContextProvider = ({ children }: DataProvider) => {
         email: emailLog,
         password: passwordLog,
       });
-      console.log(data.data.token);
+      console.log(data.data.user.id);
       localStorage.setItem("token", data.data.token);
+      localStorage.setItem("idUser", String(data.data.user.id));
+      setIdUser(data.data.user.id);
       setEmailLog("");
       setPasswordLog("");
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  }
+
+  async function AddPost(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    try {
+      const currentUser = localStorage.getItem("token");
+      if (!currentUser) return;
+      const post = await connection.post(
+        "/upload",
+        {
+          title: titleUser,
+          text: textUser,
+        },
+        { headers: { Authorization: `Bearer ${currentUser}` } },
+      );
+      console.log(post.data);
+      await getPosts();
+      setTitleUser("");
+      setTextUser("");
       return true;
     } catch (error) {
       console.log(error);
@@ -195,6 +238,13 @@ export const DataContextProvider = ({ children }: DataProvider) => {
         setEmailLog,
         setPasswordLog,
         logInUser,
+        titleUser,
+        textUser,
+        setTitleUser,
+        setTextUser,
+        AddPost,
+        idUser,
+        setIdUser,
       }}
     >
       {children}

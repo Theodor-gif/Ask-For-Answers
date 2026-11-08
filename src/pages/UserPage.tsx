@@ -9,37 +9,63 @@ const Account = () => {
   const { setView, view } = useContext(dataContext);
 
   return (
-    <section>
+    <section className="flex min-h-screen flex-col">
       <Navbar />
-      {view === false ? (
-        <div className="w-80 m-[40px_auto_40px_auto]">
-          <h3>Ask For Answers ID</h3>
-          <h3>REGISTRATION</h3>
-          <div>
-            <p>Do you already have a Ask For Answers ID ? </p>
-            <p>
-              Log in
-              <span onClick={() => setView((prev) => !prev)}> here</span>.
+
+      <main className="flex-1">
+        {view === false ? (
+          <div className="mx-auto w-full max-w-sm px-4 pt-10 text-center">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-indigo-600">
+              Ask For Answers ID
+            </h3>
+            <h3 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+              REGISTRATION
+            </h3>
+            <div className="mt-4 text-gray-600">
+              <p>Do you already have a Ask For Answers ID ? </p>
+              <p>
+                Log in
+                <span
+                  className="cursor-pointer font-semibold text-indigo-600 hover:text-indigo-700 hover:underline"
+                  onClick={() => setView((prev) => !prev)}
+                >
+                  {" "}
+                  here
+                </span>
+                .
+              </p>
+            </div>
+            <p className="mt-4 text-sm text-gray-500">
+              <span className="text-red-500">* </span>Required fields
             </p>
           </div>
-          <p>
-            <span>* </span>Required fields
-          </p>
-        </div>
-      ) : (
-        <div className="w-80 m-[40px_auto_40px_auto]">
-          <h3>Ask For Answers ID LOGIN</h3>
-          <p>Don't have a Ask For Answers ID ?</p>
-          <p>
-            Register <span onClick={() => setView((prev) => !prev)}>here</span>.
-          </p>
-          <p>
-            <span>* </span>Required fields
-          </p>
-        </div>
-      )}
+        ) : (
+          <div className="mx-auto w-full max-w-sm px-4 pt-10 text-center">
+            <h3 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              Ask For Answers ID LOGIN
+            </h3>
+            <div className="mt-4 text-gray-600">
+              <p>Don't have a Ask For Answers ID ?</p>
+              <p>
+                Register{" "}
+                <span
+                  className="cursor-pointer font-semibold text-indigo-600 hover:text-indigo-700 hover:underline"
+                  onClick={() => setView((prev) => !prev)}
+                >
+                  here
+                </span>
+                .
+              </p>
+            </div>
+            <p className="mt-4 text-sm text-gray-500">
+              <span className="text-red-500">* </span>Required fields
+            </p>
+          </div>
+        )}
 
-      {view === true ? <LogIn /> : <Register />}
+        {view === true ? <LogIn /> : <Register />}
+      </main>
+
       <Footer />
     </section>
   );
