@@ -48,6 +48,13 @@ type DataProps = {
   getUsers: () => Promise<void>;
   getPosts: () => Promise<void>;
   createUser: (e: React.FormEvent<HTMLFormElement>) => Promise<boolean>;
+  view: boolean;
+  setView: Dispatch<SetStateAction<boolean>>;
+  emailLog: string;
+  passwordLog: string;
+  setEmailLog: Dispatch<SetStateAction<string>>;
+  setPasswordLog: Dispatch<SetStateAction<string>>;
+  logInUser: (e: React.FormEvent<HTMLFormElement>) => Promise<boolean>;
 };
 
 type DataProvider = {
@@ -72,6 +79,13 @@ const defaultData: DataProps = {
   getUsers: async () => {},
   getPosts: async () => {},
   createUser: async () => false,
+  setView: () => {},
+  view: false,
+  emailLog: "",
+  passwordLog: "",
+  setEmailLog: () => {},
+  setPasswordLog: () => {},
+  logInUser: async () => false,
 };
 
 export const dataContext = createContext<DataProps>(defaultData);
@@ -84,6 +98,9 @@ export const DataContextProvider = ({ children }: DataProvider) => {
   const [age, setAge] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [view, setView] = useState(false);
+  const [emailLog, setEmailLog] = useState("");
+  const [passwordLog, setPasswordLog] = useState("");
 
   async function getUsers() {
     try {
@@ -128,6 +145,24 @@ export const DataContextProvider = ({ children }: DataProvider) => {
     }
   }
 
+  async function logInUser(e: React.FormEvent<HTMLFormElement>) {
+    try {
+      e.preventDefault();
+      const data = await connection.post("/login", {
+        email: emailLog,
+        password: passwordLog,
+      });
+      console.log(data.data.token);
+      localStorage.setItem("token", data.data.token);
+      setEmailLog("");
+      setPasswordLog("");
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  }
+
   useEffect(() => {
     getPosts();
     getUsers();
@@ -153,6 +188,13 @@ export const DataContextProvider = ({ children }: DataProvider) => {
         password,
         setPassword,
         createUser,
+        view,
+        setView,
+        emailLog,
+        passwordLog,
+        setEmailLog,
+        setPasswordLog,
+        logInUser,
       }}
     >
       {children}

@@ -1,87 +1,48 @@
-import { useContext } from "react";
-import { Link, useNavigate } from "react-router";
-import { dataContext } from "../context/contextApi.tsx";
+import Register from "../components/Register.tsx";
 import Navbar from "../components/Navbar.tsx";
+import Footer from "../components/Footer.tsx";
+import LogIn from "../components/LogIn.tsx";
+import { useContext } from "react";
+import { dataContext } from "../context/contextApi.tsx";
 
-const CreateUser = () => {
-  const {
-    firstName,
-    lastName,
-    age,
-    email,
-    password,
-    setFirstName,
-    setLastName,
-    setAge,
-    setEmail,
-    setPassword,
-    createUser,
-  } = useContext(dataContext);
+const Account = () => {
+  const { setView, view } = useContext(dataContext);
 
-  const navigate = useNavigate();
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    const ok = await createUser(e);
-    if (ok) navigate("/");
-  };
   return (
     <section>
       <Navbar />
-      <h2>Create user</h2>
-      <form className="flex flex-col w-50" onSubmit={handleSubmit}>
-        <label htmlFor="firstName">First-name</label>
-        <input
-          id="firstName"
-          className="border"
-          type="text"
-          name="firstName"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-        />
-        <label htmlFor="lastName">Last-name</label>
-        <input
-          id="lastName"
-          className="border"
-          type="text"
-          name="lastName"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-        />
-        <label htmlFor="ageUser">Age</label>
-        <input
-          id="ageUser"
-          className="border"
-          type="number"
-          name="ageUser"
-          min="1"
-          max="120"
-          value={age}
-          onChange={(e) => setAge(e.target.value)}
-        />
-        <label htmlFor="emailUser">Email</label>
-        <input
-          id="emailUser"
-          className="border"
-          type="email"
-          name="emailUser"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <label htmlFor="passwordUser">Password</label>
-        <input
-          id="passwordUser"
-          className="border"
-          type="password"
-          name="passwordUser"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button className="border mt-5 p-2" type="submit">
-          Register
-        </button>
-      </form>
+      {view === false ? (
+        <div className="w-80 m-[40px_auto_40px_auto]">
+          <h3>Ask For Answers ID</h3>
+          <h3>REGISTRATION</h3>
+          <div>
+            <p>Do you already have a Ask For Answers ID ? </p>
+            <p>
+              Log in
+              <span onClick={() => setView((prev) => !prev)}> here</span>.
+            </p>
+          </div>
+          <p>
+            <span>* </span>Required fields
+          </p>
+        </div>
+      ) : (
+        <div className="w-80 m-[40px_auto_40px_auto]">
+          <h3>Ask For Answers ID LOGIN</h3>
+          <p>Don't have a Ask For Answers ID ?</p>
+          <p>
+            Register <span onClick={() => setView((prev) => !prev)}>here</span>.
+          </p>
+          <p>
+            <span>* </span>Required fields
+          </p>
+        </div>
+      )}
+
+      {view === true ? <LogIn /> : <Register />}
+      <Footer />
     </section>
   );
 };
 
-export default CreateUser;
+export default Account;
