@@ -30,6 +30,14 @@ type postData = {
   created_at: string;
 };
 
+type commentsData = {
+  id: number;
+  user_id: number;
+  post_id: number;
+  text: string;
+  created_at: string;
+};
+
 type DataProps = {
   data: user[];
   post: postData[];
@@ -62,6 +70,14 @@ type DataProps = {
   AddPost: (e: React.FormEvent<HTMLFormElement>) => Promise<boolean>;
   setIdUser: Dispatch<SetStateAction<string>>;
   idUser: string;
+  deletePost: () => Promise<boolean>;
+  deleteAlert: boolean;
+  setDeleteAlert: Dispatch<SetStateAction<boolean>>;
+  idPost: string;
+  setIdPost: Dispatch<SetStateAction<string>>;
+  getComments: () => Promise<void>;
+  comments: commentsData[];
+  setComments: Dispatch<SetStateAction<commentsData[]>>;
 };
 
 type DataProvider = {
@@ -100,6 +116,14 @@ const defaultData: DataProps = {
   AddPost: async () => false,
   idUser: "",
   setIdUser: () => {},
+  deletePost: async () => false,
+  deleteAlert: false,
+  setDeleteAlert: () => {},
+  idPost: "",
+  setIdPost: () => {},
+  getComments: async () => {},
+  comments: [],
+  setComments: () => {},
 };
 
 export const dataContext = createContext<DataProps>(defaultData);
@@ -107,6 +131,7 @@ export const dataContext = createContext<DataProps>(defaultData);
 export const DataContextProvider = ({ children }: DataProvider) => {
   const [data, setData] = useState<user[]>([]);
   const [post, setPost] = useState<postData[]>([]);
+  const [comments, setComments] = useState<commentsData[]>([]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [age, setAge] = useState("");
@@ -118,6 +143,8 @@ export const DataContextProvider = ({ children }: DataProvider) => {
   const [titleUser, setTitleUser] = useState("");
   const [textUser, setTextUser] = useState("");
   const [idUser, setIdUser] = useState("");
+  const [deleteAlert, setDeleteAlert] = useState<boolean>(false);
+  const [idPost, setIdPost] = useState<string>("");
 
   async function getUsers() {
     try {
@@ -134,6 +161,16 @@ export const DataContextProvider = ({ children }: DataProvider) => {
       const posts = await connection.get("/posts");
       setPost(posts.data.posts);
       console.log(posts.data.posts);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function getComments() {
+    try {
+      const comments = await connection.get("/allComments");
+      setComments(comments.data.comments);
+      console.log(comments.data.comments);
     } catch (error) {
       console.error(error);
     }
@@ -206,9 +243,28 @@ export const DataContextProvider = ({ children }: DataProvider) => {
     }
   }
 
+  async function deletePost() {
+    try {
+      const currentUser = localStorage.getItem("token");
+      if (!currentUser || !idPost) return false;
+
+      await connection.delete(`/deletePost/${idPost}`, {
+        headers: { Authorization: `Bearer ${currentUser}` },
+      });
+
+      await getPosts();
+      setIdPost("");
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  }
+
   useEffect(() => {
     getPosts();
     getUsers();
+    getComments();
   }, []);
 
   return (
@@ -245,6 +301,13 @@ export const DataContextProvider = ({ children }: DataProvider) => {
         AddPost,
         idUser,
         setIdUser,
+        deletePost,
+        deleteAlert,
+        setDeleteAlert,
+        idPost,
+        setIdPost,
+        comments,
+        setComments,
       }}
     >
       {children}

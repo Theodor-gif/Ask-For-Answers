@@ -32,7 +32,6 @@ const HomePage = () => {
       <Navbar />
 
       <main className="flex-1">
-        {/* Hero */}
         <section className="mx-auto max-w-6xl px-4 py-16 text-center md:py-24">
           <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
             Ask. Share. Discuss.
