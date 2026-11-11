@@ -2,9 +2,12 @@ import correctIcon from "../assets/correct-icon.png";
 import wrongIcon from "../assets/wrong-icon.png";
 import passwordSeeIcon from "../assets/see-icon.png";
 import passwordNotSeeIcon from "../assets/notSee-icon.png";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { dataContext } from "../context/contextApi.tsx";
 import { useNavigate } from "react-router";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_PASSWORD_LENGTH = 6; // change to match your Register rules
 
 const LogIn = () => {
   const { emailLog, passwordLog, setEmailLog, setPasswordLog, logInUser } =
@@ -12,9 +15,32 @@ const LogIn = () => {
 
   const navigate = useNavigate();
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState("");
+
+  // Validation
+  const emailValid = EMAIL_REGEX.test(emailLog.trim());
+  const passwordValid = passwordLog.length >= MIN_PASSWORD_LENGTH;
+
+  // Only show an icon once the user has typed something
+  const emailTouched = emailLog.length > 0;
+  const passwordTouched = passwordLog.length > 0;
+
   async function formHandle(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoginError("");
+
+    if (!emailValid || !passwordValid) {
+      setLoginError("Please enter a valid email and password.");
+      return;
+    }
+
     const ok = await logInUser(e);
-    if (ok) navigate("/");
+    if (ok) {
+      navigate("/");
+    } else {
+      setLoginError("Wrong email or password. Please try again.");
+    }
   }
 
   return (
@@ -22,11 +48,13 @@ const LogIn = () => {
       <form
         className="flex w-full max-w-sm flex-col gap-5 rounded-xl border border-zinc-300 bg-white p-6 shadow-sm sm:p-8"
         onSubmit={formHandle}
+        noValidate
       >
         <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
           Log In
         </h1>
 
+        {/* Email */}
         <div className="flex flex-col gap-1">
           <label
             htmlFor="emailUser"
@@ -34,7 +62,11 @@ const LogIn = () => {
           >
             Email<span className="text-red-500"> *</span>
           </label>
-          <div className="flex items-center gap-2 border-b border-zinc-400 focus-within:border-indigo-600">
+          <div
+            className={`flex items-center gap-2 border-b focus-within:border-indigo-600 ${
+              emailTouched && !emailValid ? "border-red-500" : "border-zinc-400"
+            }`}
+          >
             <input
               id="emailUser"
               className="w-full bg-transparent py-2 text-base outline-none"
@@ -42,20 +74,24 @@ const LogIn = () => {
               name="emailUser"
               value={emailLog}
               onChange={(e) => setEmailLog(e.target.value)}
+              autoComplete="email"
             />
-            <img
-              className="h-4 w-4 shrink-0"
-              src={correctIcon}
-              alt="correct-icon"
-            />
-            <img
-              className="h-4 w-4 shrink-0"
-              src={wrongIcon}
-              alt="wrong-icon"
-            />
+            {emailTouched && (
+              <img
+                className="h-4 w-4 shrink-0"
+                src={emailValid ? correctIcon : wrongIcon}
+                alt={emailValid ? "correct-icon" : "wrong-icon"}
+              />
+            )}
           </div>
+          {emailTouched && !emailValid && (
+            <p className="text-xs text-red-600">
+              Enter a valid email, for example name@example.com
+            </p>
+          )}
         </div>
 
+        {/* Password */}
         <div className="flex flex-col gap-1">
           <label
             htmlFor="passwordUser"
@@ -63,33 +99,58 @@ const LogIn = () => {
           >
             Password<span className="text-red-500"> *</span>
           </label>
-          <div className="flex items-center gap-2 border-b border-zinc-400 focus-within:border-indigo-600">
+          <div
+            className={`flex items-center gap-2 border-b focus-within:border-indigo-600 ${
+              passwordTouched && !passwordValid
+                ? "border-red-500"
+                : "border-zinc-400"
+            }`}
+          >
             <input
               id="passwordUser"
               className="w-full bg-transparent py-2 text-base outline-none"
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="passwordUser"
               value={passwordLog}
               onChange={(e) => setPasswordLog(e.target.value)}
+              autoComplete="current-password"
             />
-            <div className="flex shrink-0 items-center gap-2">
+
+            {/* Show / hide password */}
+            <button
+              type="button"
+              className="shrink-0 cursor-pointer"
+              onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+            >
               <img
                 className="h-4 w-4"
-                src={passwordNotSeeIcon}
-                alt="eyeClose-icon"
+                src={showPassword ? passwordSeeIcon : passwordNotSeeIcon}
+                alt={showPassword ? "eyeOpen-icon" : "eyeClose-icon"}
               />
+            </button>
+
+            {passwordTouched && (
               <img
-                className="h-4 w-4"
-                src={passwordSeeIcon}
-                alt="eyeOpen-icon"
+                className="h-4 w-4 shrink-0"
+                src={passwordValid ? correctIcon : wrongIcon}
+                alt={passwordValid ? "correct-icon" : "wrong-icon"}
               />
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <img className="h-4 w-4" src={correctIcon} alt="correct-icon" />
-              <img className="h-4 w-4" src={wrongIcon} alt="wrong-icon" />
-            </div>
+            )}
           </div>
+          {passwordTouched && !passwordValid && (
+            <p className="text-xs text-red-600">
+              Password must have at least {MIN_PASSWORD_LENGTH} characters.
+            </p>
+          )}
         </div>
+
+        {loginError && (
+          <p className="text-center text-sm font-medium text-red-600">
+            {loginError}
+          </p>
+        )}
 
         <button
           className="mt-4 w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-indigo-700"

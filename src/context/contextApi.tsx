@@ -78,6 +78,7 @@ type DataProps = {
   getComments: () => Promise<void>;
   comments: commentsData[];
   setComments: Dispatch<SetStateAction<commentsData[]>>;
+  addComment: (postId: string, text: string) => Promise<boolean>;
 };
 
 type DataProvider = {
@@ -124,6 +125,7 @@ const defaultData: DataProps = {
   getComments: async () => {},
   comments: [],
   setComments: () => {},
+  addComment: async () => false,
 };
 
 export const dataContext = createContext<DataProps>(defaultData);
@@ -150,7 +152,6 @@ export const DataContextProvider = ({ children }: DataProvider) => {
     try {
       const users = await connection.get("/users");
       setData(users.data.users);
-      console.log(users.data);
     } catch (error) {
       console.error(error);
     }
@@ -160,7 +161,6 @@ export const DataContextProvider = ({ children }: DataProvider) => {
     try {
       const posts = await connection.get("/posts");
       setPost(posts.data.posts);
-      console.log(posts.data.posts);
     } catch (error) {
       console.error(error);
     }
@@ -170,7 +170,6 @@ export const DataContextProvider = ({ children }: DataProvider) => {
     try {
       const comments = await connection.get("/allComments");
       setComments(comments.data.comments);
-      console.log(comments.data.comments);
     } catch (error) {
       console.error(error);
     }
@@ -223,7 +222,7 @@ export const DataContextProvider = ({ children }: DataProvider) => {
     e.preventDefault();
     try {
       const currentUser = localStorage.getItem("token");
-      if (!currentUser) return;
+      if (!currentUser) return false;
       const post = await connection.post(
         "/upload",
         {
@@ -254,6 +253,25 @@ export const DataContextProvider = ({ children }: DataProvider) => {
 
       await getPosts();
       setIdPost("");
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  }
+
+  async function addComment(postId: string, text: string) {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return false;
+
+      await connection.post(
+        `/addComment/${postId}`,
+        { text },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      await getComments();
       return true;
     } catch (error) {
       console.log(error);
@@ -308,6 +326,8 @@ export const DataContextProvider = ({ children }: DataProvider) => {
         setIdPost,
         comments,
         setComments,
+        addComment,
+        getComments,
       }}
     >
       {children}

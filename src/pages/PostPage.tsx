@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useMemo, useState, type FormEvent } from "react";
 import { dataContext } from "../context/contextApi.tsx";
 import Navbar from "../components/Navbar.tsx";
 import Footer from "../components/Footer.tsx";
@@ -6,11 +6,57 @@ import SearchIcon from "../assets/Search-Icon.png";
 import { Link } from "react-router";
 
 const PostPage = () => {
-  const { post, deletePost, deleteAlert, setDeleteAlert, setIdPost } =
-    useContext(dataContext);
+  const {
+    post,
+    data,
+    comments,
+    deletePost,
+    deleteAlert,
+    setDeleteAlert,
+    setIdPost,
+  } = useContext(dataContext);
+
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const stored = localStorage.getItem("idUser");
   const id = stored ? Number(stored) : null;
+
+  const filteredPosts = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return post;
+
+    return post.filter((p) => {
+      const author = data.find((u) => u.id === p.user_id);
+      const authorName = author
+        ? `${author.first_name} ${author.last_name}`.toLowerCase()
+        : "";
+
+      return (
+        p.title.toLowerCase().includes(q) ||
+        p.text.toLowerCase().includes(q) ||
+        authorName.includes(q)
+      );
+    });
+  }, [post, data, searchTerm]);
+
+  const commentCounts = useMemo(() => {
+    const counts: Record<number, number> = {};
+    comments.forEach((c) => {
+      counts[c.post_id] = (counts[c.post_id] || 0) + 1;
+    });
+    return counts;
+  }, [comments]);
+
+  function handleSearch(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSearchTerm(searchInput);
+  }
+
+  function handleClear() {
+    setSearchInput("");
+    setSearchTerm("");
+  }
 
   function handleId(postId: string): void {
     setIdPost(postId);
@@ -27,7 +73,10 @@ const PostPage = () => {
       <Navbar />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
-        <form className="mx-auto mb-8 flex w-full max-w-xl items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 shadow-sm focus-within:border-indigo-600">
+        <form
+          onSubmit={handleSearch}
+          className="mx-auto mb-8 flex w-full max-w-xl items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 shadow-sm focus-within:border-indigo-600"
+        >
           <img
             className="h-5 w-5 shrink-0"
             src={SearchIcon}
@@ -42,10 +91,25 @@ const PostPage = () => {
             type="text"
             name="search"
             placeholder="Search posts..."
+            value={searchInput}
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+              if (e.target.value === "") setSearchTerm("");
+            }}
           />
+          {searchInput && (
+            <button
+              className="shrink-0 rounded-md px-2 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-800"
+              type="button"
+              onClick={handleClear}
+              aria-label="Clear search"
+            >
+              ✕
+            </button>
+          )}
           <button
             className="shrink-0 rounded-md bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
-            type="button"
+            type="submit"
           >
             Search
           </button>
@@ -55,37 +119,62 @@ const PostPage = () => {
           Posts
         </h1>
 
-        <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {post.map((item) => (
-            <Link key={item.id} to={`/detailPost/${item.id}`}>
-              <li className="flex flex-col rounded-xl border border-zinc-300 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
-                <h2 className="mb-2 text-xl font-semibold text-zinc-900 wrap-break-word">
-                  {item.title}
-                </h2>
-                <p className="mb-4 flex-1 text-gray-600 wrap-break-word">
-                  {item.text}
-                </p>
-                {id !== null && Number(item.user_id) === id && (
-                  <div className="flex justify-end gap-3">
-                    <button
-                      className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
-                      type="button"
+        {filteredPosts.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-zinc-300 bg-white p-6 text-center text-gray-500">
+            {searchTerm.trim()
+              ? `No posts found for "${searchTerm.trim()}".`
+              : "No posts yet."}
+          </p>
+        ) : (
+          <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredPosts.map((item) => {
+              const count = commentCounts[item.id] ?? 0;
+              const isOwner = id !== null && Number(item.user_id) === id;
+
+              return (
+                <li key={item.id} className="flex">
+                  <div className="flex w-full flex-col rounded-xl border border-zinc-300 bg-white shadow-sm transition-shadow hover:shadow-md">
+                    <Link
+                      to={`/detailPost/${item.id}`}
+                      className="flex flex-1 flex-col p-6"
                     >
-                      Edit
-                    </button>
-                    <button
-                      className="rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-                      type="button"
-                      onClick={() => handleId(String(item.id))}
-                    >
-                      Delete
-                    </button>
+                      <h2 className="mb-2 text-xl font-semibold text-zinc-900 wrap-break-word">
+                        {item.title}
+                      </h2>
+                      <p className="flex-1 text-gray-600 wrap-break-word">
+                        {item.text}
+                      </p>
+                      <p className="mt-3 text-sm font-medium text-gray-500">
+                        💬 {count} {count === 1 ? "comment" : "comments"}
+                      </p>
+                    </Link>
+
+                    {isOwner && (
+                      <div className="flex justify-end gap-3 px-6 pb-6">
+                        <button
+                          className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
+                          type="button"
+                          onClick={() => {
+                            console.log("Edit post", item.id);
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                          type="button"
+                          onClick={() => handleId(String(item.id))}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
-                )}
-              </li>
-            </Link>
-          ))}
-        </ul>
+                </li>
+              );
+            })}
+          </ul>
+        )}
 
         {deleteAlert && (
           <div

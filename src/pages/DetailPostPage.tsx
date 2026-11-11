@@ -1,16 +1,19 @@
 import { useParams, Link } from "react-router";
-import { useContext } from "react";
+import { useContext, useState, type FormEvent } from "react";
 import { dataContext } from "../context/contextApi.tsx";
 import Navbar from "../components/Navbar.tsx";
 import Footer from "../components/Footer.tsx";
 
 const DetailPost = () => {
   const { id } = useParams();
-  const { data, post, comments } = useContext(dataContext);
+  const { data, post, comments, addComment } = useContext(dataContext);
+
+  // Hooks must run before any early return
+  const [commentText, setCommentText] = useState("");
+  const [commentError, setCommentError] = useState("");
 
   const postUser = post.find((p) => String(p.id) === id);
 
-  // must come BEFORE using postUser
   if (!postUser) {
     return (
       <section className="flex min-h-screen flex-col">
@@ -31,6 +34,25 @@ const DetailPost = () => {
 
   const author = data.find((u) => u.id === postUser.user_id);
   const commentsPost = comments.filter((p) => String(p.post_id) === id);
+
+  async function handleAddComment(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setCommentError("");
+
+    if (!id || !commentText.trim()) return;
+
+    if (!localStorage.getItem("token")) {
+      setCommentError("Please log in to add a comment.");
+      return;
+    }
+
+    const ok = await addComment(id, commentText.trim());
+    if (ok) {
+      setCommentText("");
+    } else {
+      setCommentError("Could not add your comment. Please try again.");
+    }
+  }
 
   return (
     <section className="flex min-h-screen flex-col">
@@ -66,26 +88,13 @@ const DetailPost = () => {
           </p>
         </article>
 
-        {/* Create Comment */}
-        <form className="mt-10 flex flex-col gap-5 rounded-xl border border-zinc-300 bg-white p-6 shadow-sm sm:p-8">
+        <form
+          className="mt-10 flex flex-col gap-5 rounded-xl border border-zinc-300 bg-white p-6 shadow-sm sm:p-8"
+          onSubmit={handleAddComment}
+        >
           <h2 className="text-xl font-bold tracking-tight text-zinc-900 md:text-2xl">
             Add a comment
           </h2>
-
-          <div className="flex flex-col gap-1">
-            <label
-              htmlFor="commentTitle"
-              className="text-sm font-medium text-zinc-700"
-            >
-              Title<span className="text-red-500"> *</span>
-            </label>
-            <input
-              className="w-full border-b border-zinc-400 bg-transparent py-2 text-base outline-none focus:border-indigo-600"
-              id="commentTitle"
-              type="text"
-              name="commentTitle"
-            />
-          </div>
 
           <div className="flex flex-col gap-1">
             <label
@@ -99,12 +108,19 @@ const DetailPost = () => {
               id="commentText"
               rows={5}
               placeholder="Write your comment here ..."
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              required
             ></textarea>
           </div>
 
+          {commentError && (
+            <p className="text-sm font-medium text-red-600">{commentError}</p>
+          )}
+
           <button
             className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-indigo-700 sm:ml-auto sm:w-auto sm:px-8"
-            type="button"
+            type="submit"
           >
             Add comment
           </button>
