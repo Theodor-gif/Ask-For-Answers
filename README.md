@@ -67,6 +67,7 @@ Client-project/
 |-- .env.example/
 |
 |__ index.html/
+```
 
 ## What I Learned
 
@@ -86,4 +87,3 @@ Theodoros Mitropoulos
 - **Server repository:** [Ask-For-Answers-Server](https://github.com/Theodor-gif/Ask-For-Answers-Server)
 
 > The server runs on a free Render instance, so the first request after a period of inactivity can take up to a minute.
-```
