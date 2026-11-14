@@ -1,32 +1,89 @@
-# React + TypeScript + Vite
+# Ask For Answers
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Ask For Answers is a full-stack **PERN** application (PostgreSQL, Express, React, Node.js) built with TypeScript. Users can register, log in, publish posts, and discuss them in the comments.
 
-Currently, two official plugins are available:
+I built this as my first full-stack project to learn, in practice, how a PERN application works and to deepen my knowledge of TypeScript and PostgreSQL.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Register and log in as a user
+- Create a post as a logged-in user
+- Add comments to any post
+- Delete a post
+- Browse all posts and view post details
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the Oxlint configuration
+- React with TypeScript
+- Vite
+- React Router
+- Axios
+- Context API (`useContext`) for state management
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Project Structure
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
 ```
+Client-project/
+|
+|-- src/
+|   |
+|   |-- assets/
+|   |   |
+|   |   |-- alert-icon.png/
+|   |   |-- ask-icon.png/
+|   |   |-- correct-icon.png/
+|   |   |-- facebook-icon.png/
+|   |   |-- home-icon.png/
+|   |   |-- instagram-icon.png/
+|   |   |-- notSee-icon.png/
+|   |   |-- postPlus-icon.png/
+|   |   |-- Search-icon.png/
+|   |   |-- see-icon.png/
+|   |   |-- twitter-icon.png/
+|   |   |-- User-White-icon.png/
+|   |   |-- wrong-icon.png/
+|   |   |__ youtube-icon.png/
+|   |
+|   |-- components/
+|   |   |
+|   |   |-- Footer.tsx/
+|   |   |-- Login.tsx/
+|   |   |-- Navbar.tsx/
+|   |   |__ Register.tsx/
+|   |
+|   |-- context/
+|   |   |
+|   |   |__ contextApi.tsx/
+|   |
+|   |__ pages/
+|       |
+|       |-- CreatePostPage.tsx/
+|       |-- DetailPostPage.tsx/
+|       |-- FormPage.tsx/
+|       |-- Homepage.tsx/
+|       |-- PostPage.tsx/
+|       |__ UserPage.tsx/
+|
+|-- .env.example/
+|
+|__ index.html/
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## What I Learned
+
+- Building a REST API with Express and PostgreSQL
+- Typing React state, props and API data with TypeScript
+- Sharing state across components with the Context API
+- Authenticating requests with JWT
+- Deploying a full-stack app across Vercel and Render
+
+## Author
+
+Theodoros Mitropoulos
+
+## Live Demo
+
+- **Client:** https://ask-for-answers.vercel.app
+- **Server repository:** [Ask-For-Answers-Server](https://github.com/Theodor-gif/Ask-For-Answers-Server)
+
+> The server runs on a free Render instance, so the first request after a period of inactivity can take up to a minute.
+```
